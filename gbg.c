@@ -5,6 +5,23 @@
 #include <stdlib.h>
 #include <time.h>
 
+typedef struct rgb {
+    unsigned int r;
+    unsigned int g;
+    unsigned int b;
+} rgb;
+
+void random_rgb(rgb *c) {
+    c->r = rand() % 255;
+    c->g = rand() % 255;
+    c->b = rand() % 255;
+}
+void rotate_rgb(rgb *from, rgb *to) {
+    to->r = (from->r + 128) % 255;
+    to->g = (from->g + 128) % 255;
+    to->b = (from->b + 128) % 255;
+}
+
 
 void render_for_screen(Display *disp, int screen_index) {
     Colormap colormap = DefaultColormap(disp, screen_index);
@@ -17,6 +34,11 @@ void render_for_screen(Display *disp, int screen_index) {
     // Don't operate on a full size image, gradient production is slow
     unsigned int img_height = height / 4;
     unsigned int img_width = width / 4;
+
+    rgb color1;
+    rgb color2;
+    random_rgb(&color1);
+    rotate_rgb(&color1, &color2);
 
     Imlib_Image img;
     Pixmap pixmap = XCreatePixmap(disp, root, width, height, depth);
@@ -38,13 +60,11 @@ void render_for_screen(Display *disp, int screen_index) {
     imlib_image_fill_rectangle(0, 0, img_width, img_height);
 
     // First color
-    imlib_context_set_color(
-        rand() % 255, rand() % 255, rand() % 255, 255);
+    imlib_context_set_color(color1.r, color1.g, color1.b, 255);
     imlib_add_color_to_color_range(0);
 
     // Second
-    imlib_context_set_color(
-        rand() % 255, rand() % 255, rand() % 255, 255);
+    imlib_context_set_color(color2.r, color2.g, color2.b, 255);
     imlib_add_color_to_color_range(img_height);
     imlib_image_fill_color_range_rectangle(0, 0, img_width, img_height, -45.0);
 
